@@ -21,7 +21,41 @@ import { NextResponse } from 'next/server';
  * TODO (A3): avoid leaking internal error details in responses
  */
 export function handleError(err: unknown): NextResponse {
+
+  //so this method now is fixed for A3 to be able to
+  //distinguish the known/expected errors from true unexpected server failures
   console.error('Unhandled API error:', err);
 
+   //malformed JSON from req.json()
+  if (err instanceof SyntaxError) {
+    return NextResponse.json(
+      { error: 'Invalid JSON body' },
+      { status: 400 }
+    );
+  }
+
+  //postgreSQL errors have a string error code
+  if (
+    typeof err === 'object' &&
+    err !== null &&
+    'code' in err
+  ) {
+    const code = String(
+      (err as { code?: unknown }).code
+    );
+
+    //unique constraint violation / duplicate
+    if (code === '23505') {
+      return NextResponse.json(
+        { error: 'Conflict' },
+        { status: 409 }
+      );
+    }
+  }
+
+  //anything not expected is a real server error
+  //do not  show  the raw database error
   return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+
+  
 }

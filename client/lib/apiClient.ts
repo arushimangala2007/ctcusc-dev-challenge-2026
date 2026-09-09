@@ -10,6 +10,24 @@
  */
 import type { Restaurant } from './types';
 
+
+//used for part B of brennen food wrapped
+//
+export interface Insights {
+  totalVisits: number;
+  totalSpent: number;
+  averageSpent: number;
+  mostExpensiveVisit: number;
+  comfortPick: {
+    name: string;
+    visitCount: number;
+  } | null;
+  moneyPit: {
+    name: string;
+    totalSpent: number;
+  } | null;
+}
+
 // We read a base URL from the environment because Server Components fetch on
 // the server, where relative URLs don't resolve - so we need an absolute origin.
 // It's the same app on the same port, so this is normally just localhost:3000.
@@ -33,5 +51,14 @@ export async function getRestaurants(): Promise<Restaurant[]> {
  */
 export async function getRestaurant(id: number | string): Promise<Restaurant> {
   const res = await fetch(`${API_URL}/api/restaurants/${id}`, { cache: 'no-store' });
+  return res.json();
+}
+
+
+/**
+ *get Brennen's dining and spending insights
+ */
+export async function getInsights(): Promise<Insights> {
+  const res = await fetch(`${API_URL}/api/insights`, { cache: 'no-store' });
   return res.json();
 }
